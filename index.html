@@ -348,11 +348,7 @@
       ict: "использование ИКТ",
       life: "связь с жизнью и краеведческий компонент",
       krit: "развитие критического мышления",
-      patriot: "воспитание патриотизма и национальной культуры",
-      gram_chit: "развитие читательской грамотности",
-      gram_mat: "развитие математической грамотности",
-      gram_est: "развитие естественнонаучной грамотности",
-      gram_fin: "развитие финансовой грамотности"
+      patriot: "воспитание патриотизма и национальной культуры"
     };
 
     const extraParamsBE = {
@@ -362,11 +358,7 @@
       ict: "выкарыстанне ІКТ",
       life: "сувязь з жыццём і краязнаўчы кампанент",
       krit: "развіццё крытычнага мыслення",
-      patriot: "выхаванне патрыятызму і нацыянальнай культуры",
-      gram_chit: "развіццё чытацкай граматнасці",
-      gram_mat: "развіццё матэматычнай граматнасці",
-      gram_est: "развіццё прыродазнаўчай граматнасці",
-      gram_fin: "развіццё фінансавай граматнасці"
+      patriot: "выхаванне патрыятызму і нацыянальнай культуры"
     };
 
     const approachesRU = {
@@ -389,47 +381,22 @@
 
     const gradesBE = {1: "1", 2: "2", 3: "3", 4: "4", 5: "5", 6: "6", 7: "7", 8: "8", 9: "9", 10: "10", 11: "11"};
 
-    function generatePrompt() {
-      const subjectKey = document.getElementById('subject').value;
-      const grade = document.getElementById('grade').value;
-      const topic = document.getElementById('topic').value.trim();
-      const duration = document.getElementById('duration').value;
-      const customStruct = document.getElementById('customStructure').checked;
-      const structText = document.getElementById('structureText').value.trim();
-      const otherParam = document.getElementById('otherParam').value.trim();
+    // === ЦЕЛИ ПО КОМПЕТЕНЦИЯМ ===
+    const competencyGoalsRU = {
+      gram_chit: "Формировать читательскую грамотность: умение понимать, интерпретировать и оценивать тексты разных типов.",
+      gram_mat: "Развивать математическую грамотность: способность применять математические знания для решения жизненных задач.",
+      gram_est: "Формировать естественнонаучную грамотность: умение объяснять явления, ставить вопросы и делать выводы на основе наблюдений.",
+      gram_fin: "Развивать финансовую грамотность: понимание базовых понятий — доход, расход, сбережения, рациональный выбор."
+    };
 
-      // Язык промпта: только бел. для бел. предметов
-      const isBelarusian = (subjectKey === 'bel_mova' || subjectKey === 'bel_lit');
+    const competencyGoalsBE = {
+      gram_chit: "Фарміраваць чытацкую граматнасць: уменне разумець, інтэрпрэцираваць і ацэньваць тэксты розных тыпаў.",
+      gram_mat: "Развіваць матэматычную граматнасць: здольнасць прымяняць матэматычныя веды для вырашэння жыццёвых задач.",
+      gram_est: "Фарміраваць прыродазнаўчую граматнасць: уменне тлумачыць з'явы, ставіць пытанні і рабіць высновы на аснове назіранняў.",
+      gram_fin: "Развіваць фінансавую граматнасць: разуменне базавых паняццяў — даход, выдаткі, зберажэнні, рацыянальны выбар."
+    };
 
-      if (!topic) {
-        alert(isBelarusian ? "Калі ласка, увядзіце тэму ўрока." : "Пожалуйста, введите тему урока.");
-        return;
-      }
-
-      // Сбор параметров
-      const checkedBoxes = Array.from(document.querySelectorAll('#extraParams input[type="checkbox"]:checked'))
-        .filter(cb => cb.value !== 'other')
-        .map(cb => cb.value);
-
-      let extraList = [];
-      if (isBelarusian) {
-        extraList = checkedBoxes.map(k => extraParamsBE[k]);
-        if (otherParam) extraList.push(otherParam);
-      } else {
-        extraList = checkedBoxes.map(k => extraParamsRU[k]);
-        if (otherParam) extraList.push(otherParam);
-      }
-
-      // Подход
-      const approachEl = document.querySelector('input[name="approach"]:checked');
-      let approachText = "";
-      if (approachEl) {
-        const appKey = approachEl.value;
-        approachText = isBelarusian ? approachesBE[appKey] : approachesRU[appKey];
-      }
-
-      // Полная структура с целью и задачами
-      const fullStructureRU = `Урок должен включать следующие этапы:
+    const fullStructureRU = `Урок должен включать следующие этапы:
 1. Организационно-мотивационный этап:
    - Организационный момент.
    - Постановка цели урока: «Учащиеся будут знать/уметь/понимать…».
@@ -443,7 +410,7 @@
    - Рефлексия.
    - Домашнее задание с чётким инструктажем.`;
 
-      const fullStructureBE = `Ўрок павінен уключаць наступныя этапы:
+    const fullStructureBE = `Ўрок павінен уключаць наступныя этапы:
 1. Арганізацыйна-матывацыйны этап:
    - Арганізацыйны момант.
    - Пастаноўка мэты ўрока: «Вучні будуць ведаць/умець/разумець…».
@@ -457,11 +424,69 @@
    - Рэфлексія.
    - Дамашняе заданне з канкрэтным інструктажом.`;
 
+    function generatePrompt() {
+      const subjectKey = document.getElementById('subject').value;
+      const grade = document.getElementById('grade').value;
+      const topic = document.getElementById('topic').value.trim();
+      const duration = document.getElementById('duration').value;
+      const customStruct = document.getElementById('customStructure').checked;
+      const structText = document.getElementById('structureText').value.trim();
+      const otherParam = document.getElementById('otherParam').value.trim();
+
+      const isBelarusian = (subjectKey === 'bel_mova' || subjectKey === 'bel_lit');
+
+      if (!topic) {
+        alert(isBelarusian ? "Калі ласка, увядзіце тэму ўрока." : "Пожалуйста, введите тему урока.");
+        return;
+      }
+
+      // === Разделение параметров и компетенций ===
+      const allChecked = Array.from(document.querySelectorAll('#extraParams input[type="checkbox"]:checked'));
+      let generalParams = [];
+      let competencyKeys = [];
+
+      allChecked.forEach(cb => {
+        if (cb.value === 'other') return;
+        if (['gram_chit', 'gram_mat', 'gram_est', 'gram_fin'].includes(cb.value)) {
+          competencyKeys.push(cb.value);
+        } else {
+          generalParams.push(cb.value);
+        }
+      });
+
+      // Перевод обычных параметров
+      let generalList = isBelarusian
+        ? generalParams.map(k => extraParamsBE[k])
+        : generalParams.map(k => extraParamsRU[k]);
+
+      if (otherParam) generalList.push(otherParam);
+
+      // === Цели по компетенциям ===
+      let competencyGoalsText = "";
+      if (competencyKeys.length > 0) {
+        const goals = isBelarusian
+          ? competencyKeys.map(k => competencyGoalsBE[k])
+          : competencyKeys.map(k => competencyGoalsRU[k]);
+
+        competencyGoalsText = isBelarusian
+          ? `\nАсаблівую ўвагу звярні на развіццё наступных кампетэнцый:\n- ${goals.join('\n- ')}`
+          : `\nОсобое внимание удели развитию следующих компетенций:\n- ${goals.join('\n- ')}`;
+      }
+
+      // === Подход ===
+      let approachText = "";
+      const approachEl = document.querySelector('input[name="approach"]:checked');
+      if (approachEl) {
+        const appKey = approachEl.value;
+        approachText = isBelarusian ? approachesBE[appKey] : approachesRU[appKey];
+      }
+
+      // === Структура ===
       let structureDesc = customStruct && structText ?
         (isBelarusian ? `Структура ўрока: ${structText}.` : `Структура урока: ${structText}.`)
         : (isBelarusian ? fullStructureBE : fullStructureRU);
 
-      // Префикс
+      // === Префикс ===
       let prefix = "";
       if (grade >= 1 && grade <= 4) {
         prefix = isBelarusian ?
@@ -473,21 +498,25 @@
           `Ты — учитель Республики Беларусь по ${subjectsRU[subjectKey]}.`;
       }
 
-      let prompt = `${prefix} Ствары план ўрока для ${gradesBE[grade]} класа на тэму «${topic}». Працягласць ўрока — ${duration} хвілін. ${structureDesc}`;
-      if (!isBelarusian) {
-        prompt = `${prefix} Создай план урока для ${grade} класса на тему «${topic}». Продолжительность урока — ${duration} минут. ${structureDesc}`;
+      // === Сборка промпта ===
+      let prompt = isBelarusian
+        ? `${prefix} Ствары план ўрока для ${gradesBE[grade]} класа на тэму «${topic}». Працягласць ўрока — ${duration} хвілін. ${structureDesc}`
+        : `${prefix} Создай план урока для ${grade} класса на тему «${topic}». Продолжительность урока — ${duration} минут. ${structureDesc}`;
+
+      if (generalList.length > 0) {
+        prompt += isBelarusian
+          ? ` Улічвай наступнае: ${generalList.join(', ')}.`
+          : ` Учти следующее: ${generalList.join(', ')}.`;
       }
 
-      if (extraList.length > 0) {
-        prompt += isBelarusian ?
-          ` Улічвай наступнае: ${extraList.join(', ')}.` :
-          ` Учти следующее: ${extraList.join(', ')}.`;
+      if (competencyGoalsText) {
+        prompt += competencyGoalsText;
       }
 
       if (approachText) {
-        prompt += isBelarusian ?
-          ` Выкарыстай ${approachText} падыход.` :
-          ` Используй ${approachText} подход.`;
+        prompt += isBelarusian
+          ? ` Выкарыстай ${approachText} падыход.`
+          : ` Используй ${approachText} подход.`;
       }
 
       document.getElementById('promptOutput').textContent = prompt;
