@@ -23,6 +23,8 @@
       background: linear-gradient(135deg, #e0f7fa, #f8bbd0);
       padding: 20px;
       color: var(--dark);
+      position: relative;
+      min-height: 100vh;
     }
     .container {
       max-width: 850px;
@@ -31,6 +33,8 @@
       border-radius: 20px;
       padding: 25px;
       box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      position: relative;
+      z-index: 1;
     }
     h1 {
       text-align: center;
@@ -126,19 +130,61 @@
     .lesson-structure li {
       margin-bottom: 6px;
     }
-    footer {
-      text-align: center;
-      margin-top: 30px;
-      padding-top: 15px;
-      border-top: 1px solid #eee;
-      color: #666;
+
+    /* Фиксированная панель справа */
+    .action-buttons {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+    .action-buttons button {
+      width: auto;
+      padding: 10px 14px;
+      font-size: 14px;
+      margin: 0;
+    }
+
+    /* Подпись автора слева внизу */
+    .author-signature {
+      position: fixed;
+      left: 20px;
+      bottom: 20px;
       font-style: italic;
+      color: #555;
+      font-size: 14px;
+      z-index: 1000;
+      background: rgba(255,255,255,0.8);
+      padding: 6px 10px;
+      border-radius: 6px;
+      max-width: 220px;
     }
   </style>
 </head>
 <body>
+
+  <!-- Подпись автора -->
+  <div class="author-signature">Ирина Гаевская, учитель начальных классов, Беларусь</div>
+
+  <!-- Кнопки справа -->
+  <div class="action-buttons">
+    <button onclick="window.open('https://irynah2022-arch.github.io/generator-vizual/', '_blank')" style="background:#FF9800;">Наглядный материал</button>
+    <button onclick="window.open('https://irynah2022-arch.github.io/generator-list/', '_blank')" style="background:#8BC34A;">Рабочий лист</button>
+    <button onclick="window.open('https://learningapps.org/', '_blank')" style="background:#E91E63;">LearningApps</button>
+  </div>
+
   <div class="container">
     <h1>🎨 Помощник учителя Беларуси — генератор планов уроков</h1>
+
+    <!-- Язык обучения -->
+    <label>0. Язык обучения:</label>
+    <div class="radio-group">
+      <label class="radio-item"><input type="radio" name="teachingLang" value="ru" checked> Русский язык</label>
+      <label class="radio-item"><input type="radio" name="teachingLang" value="be"> Беларуская мова</label>
+    </div>
 
     <!-- Предмет -->
     <label for="subject">1. Предмет:</label>
@@ -270,11 +316,6 @@
     <div id="promptOutput">Заполните форму выше и нажмите «Сгенерировать промпт»</div>
     <button onclick="copyPrompt()" style="margin-top:10px; background:#4CAF50;">Копировать промпт</button>
     <button onclick="openQwen()" style="margin-top:10px; background:#9C27B0;">Открыть в Qwen AI</button>
-
-    <!-- Подпись -->
-    <footer>
-      Ирина Гаевская, учитель начальных классов
-    </footer>
   </div>
 
   <script>
@@ -381,7 +422,6 @@
 
     const gradesBE = {1: "1", 2: "2", 3: "3", 4: "4", 5: "5", 6: "6", 7: "7", 8: "8", 9: "9", 10: "10", 11: "11"};
 
-    // === ЦЕЛИ ПО КОМПЕТЕНЦИЯМ ===
     const competencyGoalsRU = {
       gram_chit: "Формировать читательскую грамотность: умение понимать, интерпретировать и оценивать тексты разных типов.",
       gram_mat: "Развивать математическую грамотность: способность применять математические знания для решения жизненных задач.",
@@ -390,7 +430,7 @@
     };
 
     const competencyGoalsBE = {
-      gram_chit: "Фарміраваць чытацкую граматнасць: уменне разумець, інтэрпрэцираваць і ацэньваць тэксты розных тыпаў.",
+      gram_chit: "Фарміраваць чытацкую граматнасць: уменне разумець, інтэрпрэціраваць і ацэньваць тэксты розных тыпаў.",
       gram_mat: "Развіваць матэматычную граматнасць: здольнасць прымяняць матэматычныя веды для вырашэння жыццёвых задач.",
       gram_est: "Фарміраваць прыродазнаўчую граматнасць: уменне тлумачыць з'явы, ставіць пытанні і рабіць высновы на аснове назіранняў.",
       gram_fin: "Развіваць фінансавую граматнасць: разуменне базавых паняццяў — даход, выдаткі, зберажэнні, рацыянальны выбар."
@@ -433,7 +473,21 @@
       const structText = document.getElementById('structureText').value.trim();
       const otherParam = document.getElementById('otherParam').value.trim();
 
-      const isBelarusian = (subjectKey === 'bel_mova' || subjectKey === 'bel_lit');
+      // Язык обучения (по умолчанию — русский)
+      const teachingLang = document.querySelector('input[name="teachingLang"]:checked')?.value || 'ru';
+
+      // Определяем язык промпта:
+      // - bel_mova / bel_lit → всегда белорусский
+      // - rus_yaz / rus_lit → всегда русский
+      // - иначе → по выбору пользователя
+      let isBelarusian = false;
+      if (subjectKey === 'bel_mova' || subjectKey === 'bel_lit') {
+        isBelarusian = true;
+      } else if (subjectKey === 'rus_yaz' || subjectKey === 'rus_lit') {
+        isBelarusian = false;
+      } else {
+        isBelarusian = (teachingLang === 'be');
+      }
 
       if (!topic) {
         alert(isBelarusian ? "Калі ласка, увядзіце тэму ўрока." : "Пожалуйста, введите тему урока.");
@@ -454,14 +508,12 @@
         }
       });
 
-      // Перевод обычных параметров
       let generalList = isBelarusian
         ? generalParams.map(k => extraParamsBE[k])
         : generalParams.map(k => extraParamsRU[k]);
 
       if (otherParam) generalList.push(otherParam);
 
-      // === Цели по компетенциям ===
       let competencyGoalsText = "";
       if (competencyKeys.length > 0) {
         const goals = isBelarusian
@@ -473,7 +525,6 @@
           : `\nОсобое внимание удели развитию следующих компетенций:\n- ${goals.join('\n- ')}`;
       }
 
-      // === Подход ===
       let approachText = "";
       const approachEl = document.querySelector('input[name="approach"]:checked');
       if (approachEl) {
@@ -481,12 +532,10 @@
         approachText = isBelarusian ? approachesBE[appKey] : approachesRU[appKey];
       }
 
-      // === Структура ===
       let structureDesc = customStruct && structText ?
         (isBelarusian ? `Структура ўрока: ${structText}.` : `Структура урока: ${structText}.`)
         : (isBelarusian ? fullStructureBE : fullStructureRU);
 
-      // === Префикс ===
       let prefix = "";
       if (grade >= 1 && grade <= 4) {
         prefix = isBelarusian ?
@@ -498,10 +547,14 @@
           `Ты — учитель Республики Беларусь по ${subjectsRU[subjectKey]}.`;
       }
 
-      // === Сборка промпта ===
+      // Указание языка создания
+      const languageInstruction = isBelarusian
+        ? "Ствары на беларускай мове."
+        : "Создай на русском языке.";
+
       let prompt = isBelarusian
-        ? `${prefix} Ствары план ўрока для ${gradesBE[grade]} класа на тэму «${topic}». Працягласць ўрока — ${duration} хвілін. ${structureDesc}`
-        : `${prefix} Создай план урока для ${grade} класса на тему «${topic}». Продолжительность урока — ${duration} минут. ${structureDesc}`;
+        ? `${prefix} ${languageInstruction} Ствары план ўрока для ${gradesBE[grade]} класа на тэму «${topic}». Працягласць ўрока — ${duration} хвілін. ${structureDesc}`
+        : `${prefix} ${languageInstruction} Создай план урока для ${grade} класса на тему «${topic}». Продолжительность урока — ${duration} минут. ${structureDesc}`;
 
       if (generalList.length > 0) {
         prompt += isBelarusian
