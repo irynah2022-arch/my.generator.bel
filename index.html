@@ -135,17 +135,30 @@
     .action-buttons {
       position: fixed;
       right: 20px;
-      bottom: 20px;
+      top: 50%;
+      transform: translateY(-50%);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       z-index: 1000;
+      width: 180px;
     }
     .action-buttons button {
-      width: auto;
-      padding: 10px 14px;
+      width: 100%;
+      padding: 14px 10px;
       font-size: 14px;
       margin: 0;
+      text-align: center;
+      white-space: normal;
+      line-height: 1.3;
+    }
+
+    /* Выделение текущей страницы */
+    .current-page {
+      background: #FFD700 !important;
+      color: #000 !important;
+      font-weight: bold;
+      border: 2px solid #FFA500;
     }
 
     /* Подпись автора слева внизу */
@@ -153,14 +166,23 @@
       position: fixed;
       left: 20px;
       bottom: 20px;
-      font-style: italic;
-      color: #555;
-      font-size: 14px;
+      font-style: normal;
+      color: #fff;
+      font-size: 16px;
       z-index: 1000;
-      background: rgba(255,255,255,0.8);
-      padding: 6px 10px;
-      border-radius: 6px;
-      max-width: 220px;
+      background: linear-gradient(to right, #0033A0, #CE1126); /* Флаг Беларуси цвета */
+      padding: 12px 16px;
+      border-radius: 10px;
+      max-width: 260px;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .author-signature::before {
+      content: "🇧🇾";
+      font-size: 20px;
     }
   </style>
 </head>
@@ -171,8 +193,12 @@
 
   <!-- Кнопки справа -->
   <div class="action-buttons">
-    <button onclick="window.open('https://irynah2022-arch.github.io/generator-vizual/', '_blank')" style="background:#FF9800;">Наглядный материал</button>
+    <button onclick="window.open('https://sites.google.com/view/irynahayeuskaya/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0', '_blank')" style="background:#673AB7;">Цифровой портфель учителя</button>
+    <button class="current-page" onclick="window.open('https://irynah2022-arch.github.io/my.generator.bel/', '_blank')">План-конспект урока</button>
     <button onclick="window.open('https://irynah2022-arch.github.io/generator-list/', '_blank')" style="background:#8BC34A;">Рабочий лист</button>
+    <button onclick="window.open('https://irynah2022-arch.github.io/generator-vizual/', '_blank')" style="background:#FF9800;">Наглядный материал</button>
+    <button onclick="window.open('https://eior.by/obrazovanie/obshchee-srednee/index.php', '_blank')" style="background:#009688;">EIOR.by</button>
+    <button onclick="window.open('https://gamma.app/ru', '_blank')" style="background:#FF5722;">Gamma</button>
     <button onclick="window.open('https://learningapps.org/', '_blank')" style="background:#E91E63;">LearningApps</button>
   </div>
 
@@ -234,8 +260,12 @@
     <label for="topic">3. Тема урока:</label>
     <input type="text" id="topic" placeholder="Например: Скланенне назоўнікаў, Present Simple, Внутреннее строение Земли и т.д.">
 
+    <!-- Текст из учебника -->
+    <label for="textbookText">4. Текст из учебника (если есть):</label>
+    <textarea id="textbookText" rows="5" placeholder="Вставьте текст страницы(ы) учебника, относящейся к уроку. Только текст, без изображений."></textarea>
+
     <!-- Доп. параметры -->
-    <label>4. Дополнительные параметры:</label>
+    <label>5. Дополнительные параметры:</label>
     <div class="checkbox-group" id="extraParams">
       <label class="checkbox-item"><input type="checkbox" value="inkl"> Учёт инклюзивного образования</label>
       <label class="checkbox-item"><input type="checkbox" value="game"> Игровая форма подачи материала</label>
@@ -250,11 +280,18 @@
       <label class="checkbox-item"><input type="checkbox" value="gram_est"> Развитие естественнонаучной грамотности</label>
       <label class="checkbox-item"><input type="checkbox" value="gram_fin"> Развитие финансовой грамотности</label>
       
+      <label class="checkbox-item"><input type="checkbox" value="comm"> Коммуникативная компетенция</label>
+      <label class="checkbox-item"><input type="checkbox" value="soc_trud"> Социально-трудовая компетенция</label>
+      <label class="checkbox-item"><input type="checkbox" value="obs_pol"> Общественно-политическая грамотность</label>
+      <label class="checkbox-item"><input type="checkbox" value="digital"> Информационная грамотность</label>
+      <label class="checkbox-item"><input type="checkbox" value="global"> Глобальные компетенции</label>
+      <label class="checkbox-item"><input type="checkbox" value="creative"> Креативное мышление</label>
+      
       <label class="checkbox-item"><input type="checkbox" value="other"> Другое: <input type="text" id="otherParam" style="width:120px; margin-left:5px; padding:4px;"></label>
     </div>
 
     <!-- Подход -->
-    <label>5. Подход к обучению:</label>
+    <label>6. Подход к обучению:</label>
     <div class="radio-group">
       <label class="radio-item"><input type="radio" name="approach" value="trad"> Традиционный</label>
       <label class="radio-item"><input type="radio" name="approach" value="deyat"> Деятельностный</label>
@@ -262,10 +299,13 @@
       <label class="radio-item"><input type="radio" name="approach" value="game"> Игровой</label>
       <label class="radio-item"><input type="radio" name="approach" value="diff"> Дифференцированный</label>
       <label class="radio-item"><input type="radio" name="approach" value="combo"> Комбинированный</label>
+      <label class="radio-item"><input type="radio" name="approach" value="result"> Результативный</label>
+      <label class="radio-item"><input type="radio" name="approach" value="competent"> Компетентностный</label>
+      <label class="radio-item"><input type="radio" name="approach" value="lichn"> Личностно-ориентированный</label>
     </div>
 
     <!-- Длительность -->
-    <label>6. Длительность урока:</label>
+    <label>7. Длительность урока:</label>
     <div class="duration-buttons">
       <button type="button" onclick="setDuration(35)">35 мин (1 кл)</button>
       <button type="button" onclick="setDuration(40)">40 мин (2–4 кл)</button>
@@ -274,7 +314,7 @@
     <input type="hidden" id="duration" value="45">
 
     <!-- Структура урока -->
-    <label>7. Структура урока:</label>
+    <label>8. Структура урока:</label>
     <div class="lesson-structure">
       <strong>Стандартная структура урока (общая длительность: <span id="durDisplay">45</span> минут):</strong>
       <ol>
@@ -389,7 +429,13 @@
       ict: "использование ИКТ",
       life: "связь с жизнью и краеведческий компонент",
       krit: "развитие критического мышления",
-      patriot: "воспитание патриотизма и национальной культуры"
+      patriot: "воспитание патриотизма и национальной культуры",
+      comm: "развитие коммуникативной компетенции",
+      soc_trud: "формирование социально-трудовой компетенции",
+      obs_pol: "развитие общественно-политической грамотности",
+      digital: "развитие информационной грамотности",
+      global: "формирование глобальных компетенций",
+      creative: "развитие креативного мышления"
     };
 
     const extraParamsBE = {
@@ -399,7 +445,13 @@
       ict: "выкарыстанне ІКТ",
       life: "сувязь з жыццём і краязнаўчы кампанент",
       krit: "развіццё крытычнага мыслення",
-      patriot: "выхаванне патрыятызму і нацыянальнай культуры"
+      patriot: "выхаванне патрыятызму і нацыянальнай культуры",
+      comm: "развіццё камунікатыўнай кампетэнцыі",
+      soc_trud: "фарміраванне сацыяльна-працоўнай кампетэнцыі",
+      obs_pol: "развіццё грамадска-палітычнай граматнасці",
+      digital: "развіццё інфармацыйнай граматнасці",
+      global: "фарміраванне глабальных кампетэнцый",
+      creative: "развіццё крэатыўнага мыслення"
     };
 
     const approachesRU = {
@@ -408,7 +460,10 @@
       project: "проектный",
       game: "игровой",
       diff: "дифференцированный",
-      combo: "комбинированный"
+      combo: "комбинированный",
+      result: "результативный",
+      competent: "компетентностный",
+      lichn: "личностно-ориентированный"
     };
 
     const approachesBE = {
@@ -417,7 +472,10 @@
       project: "праектны",
       game: "гульнявы",
       diff: "дыферэнцыраваны",
-      combo: "камбінаваны"
+      combo: "камбінаваны",
+      result: "рэзультатыўны",
+      competent: "кампетэнтнасны",
+      lichn: "асобасна-арыентаваны"
     };
 
     const gradesBE = {1: "1", 2: "2", 3: "3", 4: "4", 5: "5", 6: "6", 7: "7", 8: "8", 9: "9", 10: "10", 11: "11"};
@@ -468,18 +526,14 @@
       const subjectKey = document.getElementById('subject').value;
       const grade = document.getElementById('grade').value;
       const topic = document.getElementById('topic').value.trim();
+      const textbookText = document.getElementById('textbookText').value.trim();
       const duration = document.getElementById('duration').value;
       const customStruct = document.getElementById('customStructure').checked;
       const structText = document.getElementById('structureText').value.trim();
       const otherParam = document.getElementById('otherParam').value.trim();
 
-      // Язык обучения (по умолчанию — русский)
       const teachingLang = document.querySelector('input[name="teachingLang"]:checked')?.value || 'ru';
 
-      // Определяем язык промпта:
-      // - bel_mova / bel_lit → всегда белорусский
-      // - rus_yaz / rus_lit → всегда русский
-      // - иначе → по выбору пользователя
       let isBelarusian = false;
       if (subjectKey === 'bel_mova' || subjectKey === 'bel_lit') {
         isBelarusian = true;
@@ -494,7 +548,6 @@
         return;
       }
 
-      // === Разделение параметров и компетенций ===
       const allChecked = Array.from(document.querySelectorAll('#extraParams input[type="checkbox"]:checked'));
       let generalParams = [];
       let competencyKeys = [];
@@ -547,7 +600,6 @@
           `Ты — учитель Республики Беларусь по ${subjectsRU[subjectKey]}.`;
       }
 
-      // Указание языка создания
       const languageInstruction = isBelarusian
         ? "Ствары на беларускай мове."
         : "Создай на русском языке.";
@@ -555,6 +607,14 @@
       let prompt = isBelarusian
         ? `${prefix} ${languageInstruction} Ствары план ўрока для ${gradesBE[grade]} класа на тэму «${topic}». Працягласць ўрока — ${duration} хвілін. ${structureDesc}`
         : `${prefix} ${languageInstruction} Создай план урока для ${grade} класса на тему «${topic}». Продолжительность урока — ${duration} минут. ${structureDesc}`;
+
+      // Добавляем текст из учебника, если есть
+      if (textbookText) {
+        const textbookPart = isBelarusian
+          ? `\nНіжэй прыведзены тэкст з падручніка, які трэба выкарыстаць пры распрацоўцы ўрока:\n«${textbookText}»`
+          : `\nНиже приведён текст из учебника, который необходимо использовать при разработке урока:\n«${textbookText}»`;
+        prompt += textbookPart;
+      }
 
       if (generalList.length > 0) {
         prompt += isBelarusian
